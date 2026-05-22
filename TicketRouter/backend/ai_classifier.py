@@ -1,8 +1,8 @@
+import os
 import requests
 from typing import List
 
-# 已直接写入 DeepSeek API Key
-DEEPSEEK_API_KEY = "sk-2e2848b5210a49eca40be2342dfddb33"
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
 DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
 DEEPSEEK_MODEL = "deepseek-chat"
 CATEGORIES = ["网络问题", "硬件故障", "软件异常", "账号权限"]

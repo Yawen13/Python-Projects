@@ -1,16 +1,9 @@
-# Python artifacts
+# Python
 __pycache__/
-*.py[cod]
+*.pyc
 *.pyo
-*.pyd
 *.egg-info/
 dist/
-
-# Virtual environments
-venv/
-.env
-
-# Database files
 *.db
 
 # Claude Code
@@ -19,6 +12,9 @@ venv/
 # IDE
 .vscode/
 .idea/
+
+# Environment
+.env
 
 # OS
 .DS_Store

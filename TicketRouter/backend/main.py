@@ -22,9 +22,10 @@ from backend.db import (
     get_ticket,
     add_ticket,
     update_ticket_status,
+    update_ticket_suggestion,
     get_ticket_stats,
 )
-from backend.ai_classifier import classify_description
+from backend.ai_classifier import classify_description, generate_suggestion
 
 app = FastAPI(title="IT 智能报修台")
 
@@ -130,6 +131,23 @@ def ticket_stats():
         by_category[row["category"]] = by_category.get(row["category"], 0) + count
         by_status[row["status"]] = by_status.get(row["status"], 0) + count
     return TicketStats(total=total, by_category=by_category, by_status=by_status)
+
+
+class TicketSuggestion(BaseModel):
+    suggestion: str
+
+
+@app.get("/api/tickets/{ticket_id}/suggestion", response_model=TicketSuggestion)
+def get_ticket_suggestion(ticket_id: int):
+    row = get_ticket(ticket_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="工单不存在")
+    suggestion = row["suggestion"]
+    if suggestion:
+        return TicketSuggestion(suggestion=suggestion)
+    suggestion = generate_suggestion(row["description"], row["category"])
+    update_ticket_suggestion(ticket_id, suggestion)
+    return TicketSuggestion(suggestion=suggestion)
 
 
 @app.get("/")

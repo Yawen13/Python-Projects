@@ -25,10 +25,15 @@
             --color-border-light: oklch(0.91 0.004 85);
 
             /* category colors */
-            --color-network:   oklch(0.52 0.14 252);
-            --color-hardware:  oklch(0.55 0.15 35);
-            --color-software:  oklch(0.50 0.14 305);
-            --color-account:   oklch(0.53 0.13 158);
+            --color-network:    oklch(0.52 0.14 252);
+            --color-hardware:   oklch(0.55 0.15 35);
+            --color-software:   oklch(0.50 0.14 305);
+            --color-account:    oklch(0.53 0.13 158);
+            --color-electrical: oklch(0.53 0.15 78);
+            --color-plumbing:   oklch(0.50 0.13 200);
+            --color-furniture:  oklch(0.45 0.09 65);
+            --color-hvac:       oklch(0.52 0.14 230);
+            --color-other:      oklch(0.40 0.02 90);
 
             /* status colors */
             --color-pending:   oklch(0.64 0.16 55);
@@ -253,7 +258,12 @@
         .chip-network  { background: oklch(0.94 0.03 252); color: oklch(0.40 0.14 250); }
         .chip-hardware { background: oklch(0.94 0.03 40);  color: oklch(0.42 0.15 35); }
         .chip-software { background: oklch(0.94 0.03 305); color: oklch(0.38 0.14 303); }
-        .chip-account  { background: oklch(0.94 0.03 158); color: oklch(0.40 0.13 155); }
+        .chip-account    { background: oklch(0.94 0.03 158); color: oklch(0.40 0.13 155); }
+        .chip-electrical { background: oklch(0.94 0.04 80);  color: oklch(0.42 0.15 78); }
+        .chip-plumbing   { background: oklch(0.94 0.03 195); color: oklch(0.38 0.13 200); }
+        .chip-furniture  { background: oklch(0.94 0.02 70);  color: oklch(0.38 0.09 65); }
+        .chip-hvac       { background: oklch(0.94 0.03 225); color: oklch(0.40 0.14 230); }
+        .chip-other      { background: oklch(0.94 0.01 95);  color: oklch(0.38 0.02 90); }
 
         /* --- stats bar responsive --- */
         @media (max-width: 600px) {
@@ -386,7 +396,12 @@
         .ticket-card .cat-dot.network  { background: var(--color-network); }
         .ticket-card .cat-dot.hardware { background: var(--color-hardware); }
         .ticket-card .cat-dot.software { background: var(--color-software); }
-        .ticket-card .cat-dot.account  { background: var(--color-account); }
+        .ticket-card .cat-dot.account    { background: var(--color-account); }
+        .ticket-card .cat-dot.electrical { background: var(--color-electrical); }
+        .ticket-card .cat-dot.plumbing   { background: var(--color-plumbing); }
+        .ticket-card .cat-dot.furniture  { background: var(--color-furniture); }
+        .ticket-card .cat-dot.hvac       { background: var(--color-hvac); }
+        .ticket-card .cat-dot.other      { background: var(--color-other); }
 
         .ticket-card .card-time {
             font-family: var(--font-mono);
@@ -431,6 +446,35 @@
         .status-badge.pending  { color: oklch(0.45 0.16 55); }
         .status-badge.progress { color: oklch(0.42 0.13 245); }
         .status-badge.done     { color: oklch(0.40 0.14 150); }
+
+        /* suggestion */
+        .ticket-card .card-suggestion {
+            margin-top: var(--space-3);
+            padding: var(--space-3);
+            background: var(--color-surface-alt);
+            border-left: 3px solid var(--color-accent);
+            border-radius: var(--radius-sm);
+            font-size: 0.8125rem;
+            color: var(--color-text-muted);
+            line-height: 1.65;
+            display: none;
+        }
+        .ticket-card .card-suggestion.visible {
+            display: block;
+            animation: fadeIn 0.3s var(--ease-out-quart);
+        }
+        .ticket-card .card-suggestion-label {
+            font-size: 0.6875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--color-accent);
+            margin-bottom: var(--space-2);
+            font-family: var(--font-mono);
+        }
+        .ticket-card .card-suggestion-content {
+            white-space: pre-wrap;
+        }
 
         /* card highlight flash */
         .ticket-card.flash {
@@ -563,7 +607,12 @@
             '网络问题': 'network',
             '硬件故障': 'hardware',
             '软件异常': 'software',
-            '账号权限': 'account'
+            '账号权限': 'account',
+            '电力照明': 'electrical',
+            '管道漏水': 'plumbing',
+            '门窗家具': 'furniture',
+            '空调暖通': 'hvac',
+            '其他问题': 'other'
         };
         const STATUS_CSS = {
             '待处理': 'pending',
@@ -577,7 +626,12 @@
             '网络问题': 'chip-network',
             '硬件故障': 'chip-hardware',
             '软件异常': 'chip-software',
-            '账号权限': 'chip-account'
+            '账号权限': 'chip-account',
+            '电力照明': 'chip-electrical',
+            '管道漏水': 'chip-plumbing',
+            '门窗家具': 'chip-furniture',
+            '空调暖通': 'chip-hvac',
+            '其他问题': 'chip-other'
         };
 
         /* ------- session ------- */
@@ -662,11 +716,14 @@
 
                     var actionsHtml = '';
                     if (role === ROLES.ADMIN) {
+                        var suggestBtn = '<button class="btn btn-outline btn-xs" onclick="fetchSuggestion(' + ticket.id + ', this)">AI 处理建议</button>';
                         var buttons = STATUSES.filter(function(s) { return s !== ticket.status; }).map(function(status) {
                             return '<button class="btn btn-outline btn-xs" onclick="updateStatus(' + ticket.id + ",'" + status + "')\">设为" + status + '</button>';
                         });
-                        actionsHtml = '<div class="card-actions">' + buttons.join('') + '</div>';
+                        actionsHtml = '<div class="card-actions">' + suggestBtn + buttons.join('') + '</div>';
                     }
+
+                    var suggestionHtml = '<div class="card-suggestion" id="sugg-' + ticket.id + '"><div class="card-suggestion-label">AI 处理建议</div><div class="card-suggestion-content"></div></div>';
 
                     card.innerHTML =
                         topBar +
@@ -674,6 +731,7 @@
                             headerHtml +
                             timeHtml +
                             descHtml +
+                            suggestionHtml +
                             actionsHtml +
                         '</div>';
 
@@ -797,6 +855,48 @@
                 console.error(e);
                 statusText.textContent = e.message || '状态更新失败，请稍后重试。';
                 statusText.className = 'form-hint error';
+            }
+        }
+
+        async function fetchSuggestion(ticketId, btn) {
+            var statusText = document.getElementById('statusText');
+            var suggestionEl = document.getElementById('sugg-' + ticketId);
+            var contentEl = suggestionEl ? suggestionEl.querySelector('.card-suggestion-content') : null;
+
+            if (!suggestionEl || !contentEl) {
+                statusText.textContent = '页面元素缺失，请刷新后重试。';
+                statusText.className = 'form-hint error';
+                return;
+            }
+
+            if (suggestionEl.classList.contains('visible')) {
+                suggestionEl.classList.remove('visible');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-dots"><span></span><span></span><span></span></span> 生成中';
+            statusText.textContent = '正在生成 AI 处理建议...';
+            statusText.className = 'form-hint';
+
+            try {
+                var res = await fetch('/api/tickets/' + ticketId + '/suggestion');
+                if (!res.ok) {
+                    var err = await res.json();
+                    throw new Error(err.detail || '获取建议失败');
+                }
+                var data = await res.json();
+                contentEl.textContent = data.suggestion;
+                suggestionEl.classList.add('visible');
+                statusText.textContent = 'AI 处理建议已生成。';
+                statusText.className = 'form-hint success';
+            } catch (e) {
+                console.error(e);
+                statusText.textContent = e.message || '获取 AI 建议失败，请稍后重试。';
+                statusText.className = 'form-hint error';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'AI 处理建议';
             }
         }
 

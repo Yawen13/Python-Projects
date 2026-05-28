@@ -20,13 +20,16 @@ def init_db():
             description TEXT NOT NULL,
             category TEXT NOT NULL,
             status TEXT NOT NULL DEFAULT '待处理',
-            created_at TEXT NOT NULL
+            created_at TEXT NOT NULL,
+            suggestion TEXT
         )
         """
     )
     columns = [row[1] for row in conn.execute("PRAGMA table_info(tickets)").fetchall()]
     if "status" not in columns:
         conn.execute("ALTER TABLE tickets ADD COLUMN status TEXT NOT NULL DEFAULT '待处理'")
+    if "suggestion" not in columns:
+        conn.execute("ALTER TABLE tickets ADD COLUMN suggestion TEXT")
     conn.commit()
     conn.close()
 
@@ -61,6 +64,13 @@ def get_ticket(ticket_id: int):
 def update_ticket_status(ticket_id: int, status: str) -> None:
     conn = get_db_connection()
     conn.execute("UPDATE tickets SET status = ? WHERE id = ?", (status, ticket_id))
+    conn.commit()
+    conn.close()
+
+
+def update_ticket_suggestion(ticket_id: int, suggestion: str) -> None:
+    conn = get_db_connection()
+    conn.execute("UPDATE tickets SET suggestion = ? WHERE id = ?", (suggestion, ticket_id))
     conn.commit()
     conn.close()
 
